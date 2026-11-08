@@ -3,14 +3,15 @@
     <springProperty scope="context" name="APP_ENV" source="storex.env" defaultValue="dev"/>
     <springProperty scope="context" name="LOGSTASH_DEST" source="storex.logstash.destination" defaultValue="localhost:5000"/>
 
-    <!-- Console: dang plaintext de doc bang docker logs -->
+    <!-- Console: dang plaintext de doc bang docker logs. requestId (tu MDC) dung o dau moi dong -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>[%X{requestId:-none}] %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Gui log JSON (moi dong la mot JSON object, ket thuc bang newline) toi Logstash qua TCP -->
+    <!-- Gui log JSON toi Logstash qua TCP. LogstashEncoder mac dinh ghi ca MDC,
+         nen requestId tu dong xuat hien thanh field rieng trong JSON -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGSTASH_DEST}</destination>
         <reconnectionDelay>5 seconds</reconnectionDelay>

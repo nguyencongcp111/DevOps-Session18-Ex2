@@ -66,4 +66,24 @@ curl -s 'localhost:9200/_cat/indices?v'
 
 ## Actuator (payment-service)
 
-`payment-service` có Spring Boot Actuator. Cấu hình hiện chỉ expose `health,info` (xem `payment-service/src/main/resources/application.yml`).
+`payment-service` có Spring Boot Actuator, đã expose `health,info,loggers`. Đổi level log lúc đang chạy:
+
+```bash
+curl -i -X POST localhost:8083/actuator/loggers/com.storex.payment \
+  -H 'Content-Type: application/json' -d '{"configuredLevel":"DEBUG"}'
+```
+
+## Checkout và TraceId (RequestId)
+
+`POST /api/checkout` chạy cả luồng mua hàng: kiểm tra giỏ hàng, giữ hàng, tạo đơn (gọi user-service), thanh toán (gọi payment-service). Các dòng log của luồng này viết theo kiểu hay gặp: chỉ dòng đầu có `userId`, dòng lỗi `Transaction Failed` không mang định danh nào.
+
+```bash
+curl -s -X POST localhost:8082/api/checkout -H 'Content-Type: application/json' \
+  -d '{"userId":1,"productName":"Ban phim co","quantity":1,"amount":1200000,"paymentMethod":"CARD"}'
+```
+
+Mỗi service có `RequestIdFilter` sinh một UUID cho mỗi request. Script bắn nhiều request đồng thời, in ra kết quả thật ở phía client:
+
+```bash
+python3 scripts/load_checkout.py 20
+```

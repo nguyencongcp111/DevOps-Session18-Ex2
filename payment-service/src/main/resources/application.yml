@@ -9,6 +9,7 @@ management:
   endpoints:
     web:
       exposure:
+        # Lỗi: endpoint loggers chưa được expose
         include: health,info,loggers
 
 storex:
